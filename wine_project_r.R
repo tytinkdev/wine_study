@@ -15,7 +15,7 @@ library(MASS)
 sum(is.na(wine))
 # None!
 wine <- read.csv("~/Desktop/Grad School/Quantitative Methods/Project/wine_csv.csv", sep=";")
-# plot everything vs everything and eyeball trends 
+# Create independent plots comparing each variable to each variable to visually discover collinearities
 ggplot(wine, aes(x=fixed.acidity, y=quality)) + geom_point() + 
   geom_smooth(method = 'lm')+ 
   labs(title = 'Quality vs Fixed Acidity',
@@ -82,7 +82,7 @@ ggplot(wine, aes(x=alcohol, y=quality)) + geom_point() +
        x='Alcohol', y='Quality') +
   theme_classic()
 
-# check Pearson correlations
+# Check for collinearity with Pearson Correlations
 wineCol <- colnames(wine)
 wine_pearCor <- c(cor(wine$quality, wine$fixed.acidity , method = 'pearson'),
 cor(wine$quality, wine$volatile.acidity , method = 'pearson'),
@@ -101,7 +101,7 @@ wineStats2<- t(wineStats)
 wineStats2
 
 # Check the Variance Inflaction Factor VIF 
-# split the data into training and test set 
+# start by splitting the data into training and test set 
 set.seed(123)
 training.samples <- wine$quality %>%
   createDataPartition(p = .08, list = FALSE)
@@ -116,7 +116,7 @@ data.frame(
   RMSE = RMSE(predicitons, test.data$quality),
   R2 = R2(predicitons, test.data$quality)
 )
-# Check the VIF using vif()
+# Check the variance inflation factor (VIF)
 wineModel1 <- as.data.frame(vif(VIF_wineModel))
 wineModel1
 # Fixed Acidity and Density have high VIF, meaning that we should remove them from our model.
@@ -129,6 +129,6 @@ wineCoef
 head(wine)
 wineMLR_data <- subset(wine, select=-c(density, fixed.acidity, residual.sugar, citric.acid))
 head(wineMLR_data)
-# Run multiple linear regression
+# Run multiple linear regression and summarize
 summary(lm(quality~ ., data = wineMLR_data))
 
